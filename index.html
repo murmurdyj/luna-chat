@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Luna Chat">
+<meta name="theme-color" content="#f2f2f7" id="theme-meta">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.png">
+<title>Luna Chat</title>
+<style>
+:root {
+  --bg:#f2f2f7; --surface:#fff; --surface2:#f2f2f7; --border:#e5e5ea;
+  --text:#1c1c1e; --text2:#8e8e93; --text3:#aeaeb2;
+  --bubble-ai:#fff; --bubble-me:#007aff; --bubble-me-text:#fff;
+  --input-bg:#fff; --header-bg:rgba(242,242,247,0.92);
+  --accent:#007aff; --online:#34c759;
+  --chip-bg:#fff; --chip-text:#007aff;
+  --modal-bg:rgba(0,0,0,0.45); --modal-surface:#fff;
+  --toggle-off:#e5e5ea; --toggle-on:#34c759;
+}
+[data-dark="1"] {
+  --bg:#000; --surface:#1c1c1e; --surface2:#2c2c2e; --border:#3a3a3c;
+  --text:#fff; --text2:#aeaeb2; --text3:#636366;
+  --bubble-ai:#2c2c2e; --bubble-me:#0a84ff;
+  --input-bg:#1c1c1e; --header-bg:rgba(0,0,0,0.88);
+  --chip-bg:#2c2c2e; --chip-text:#0a84ff;
+  --modal-surface:#1c1c1e; --toggle-off:#3a3a3c;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;background:var(--bg);color:var(--text)}
+#app{display:flex;flex-direction:column;height:100%;max-width:480px;margin:0 auto;position:relative}
+
+/* Header */
+#hdr{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 16px;
+  padding-top:calc(10px + env(safe-area-inset-top,0px));
+  background:var(--header-bg);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-bottom:0.5px solid var(--border);
+  flex-shrink:0;z-index:10;
+}
+#hav{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#a78bfa,#818cf8);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;cursor:pointer}
+#hinfo{flex:1;min-width:0}
+#hname{font-size:15px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#hstatus{font-size:11px;color:var(--online);display:flex;align-items:center;gap:3px;margin-top:1px}
+#hdot{width:6px;height:6px;border-radius:50%;background:var(--online);flex-shrink:0}
+#hbtns{display:flex;gap:6px;align-items:center}
+.hbtn{width:32px;height:32px;border-radius:50%;background:var(--surface2);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px}
+.hbtn:active{opacity:0.6}
+
+/* Mode badge */
+#mbadge{
+  display:flex;align-items:center;gap:4px;font-size:10px;font-weight:500;
+  padding:3px 8px;border-radius:10px;border:0.5px solid var(--border);
+  background:var(--surface2);color:var(--text2);cursor:pointer;white-space:nowrap;flex-shrink:0;
+}
+#mbadge.on{background:#e8f4ff;color:#007aff;border-color:#b3d9ff}
+[data-dark="1"] #mbadge.on{background:#0a2a4a;color:#0a84ff;border-color:#0a4a7a}
+#mdot{width:6px;height:6px;border-radius:50%;background:currentColor}
+
+/* Messages */
+#msgs{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:6px;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
+#msgs::-webkit-scrollbar{display:none}
+.day-lbl{text-align:center;font-size:11px;color:var(--text3);margin:6px 0;user-select:none}
+.row{display:flex;flex-direction:column}
+.row.me{align-items:flex-end}
+.row.ai{align-items:flex-start}
+.row-in{display:flex;align-items:flex-end;gap:6px}
+.row.me .row-in{flex-direction:row-reverse}
+.mav{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#a78bfa,#818cf8);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.bub{max-width:74%;padding:10px 14px;font-size:15px;line-height:1.5;word-break:break-word}
+.row.ai .bub{background:var(--bubble-ai);color:var(--text);border-radius:18px 18px 18px 4px;border:0.5px solid var(--border)}
+.row.me .bub{background:var(--bubble-me);color:var(--bubble-me-text);border-radius:18px 18px 4px 18px}
+.btime{font-size:10px;color:var(--text3);margin-top:3px;padding:0 4px}
+.row.me .btime{text-align:right}
+.reacts{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap}
+.react{font-size:15px;padding:2px 6px;border-radius:12px;background:var(--surface2);border:0.5px solid var(--border);cursor:pointer;user-select:none;transition:transform .1s}
+.react:active{transform:scale(1.3)}
+
+/* Typing */
+.typbub{background:var(--bubble-ai);border:0.5px solid var(--border);border-radius:18px 18px 18px 4px;padding:12px 16px;display:flex;gap:4px;align-items:center}
+.td{width:7px;height:7px;border-radius:50%;background:var(--text3);animation:bl 1.2s infinite}
+.td:nth-child(2){animation-delay:.2s}
+.td:nth-child(3){animation-delay:.4s}
+@keyframes bl{0%,80%,100%{opacity:.3;transform:scale(.8)}40%{opacity:1;transform:scale(1)}}
+
+/* Quick chips */
+#chips{padding:8px 16px 6px;display:flex;gap:6px;overflow-x:auto;flex-shrink:0;background:var(--bg)}
+#chips::-webkit-scrollbar{display:none}
+.chip{white-space:nowrap;font-size:13px;padding:6px 14px;border-radius:16px;background:var(--chip-bg);color:var(--chip-text);border:0.5px solid var(--border);cursor:pointer;flex-shrink:0}
+.chip:active{opacity:0.6}
+
+/* Input bar */
+#ibar{
+  padding:8px 12px;
+  padding-bottom:calc(8px + env(safe-area-inset-bottom,0px));
+  background:var(--header-bg);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-top:0.5px solid var(--border);
+  display:flex;gap:8px;align-items:flex-end;flex-shrink:0;
+}
+#tinput{
+  flex:1;border:0.5px solid var(--border);border-radius:20px;
+  padding:9px 14px;font-size:15px;font-family:inherit;
+  color:var(--text);background:var(--input-bg);
+  outline:none;resize:none;max-height:100px;line-height:1.45;
+  -webkit-appearance:none;
+}
+#tinput:focus{border-color:var(--accent)}
+#tinput::placeholder{color:var(--text3)}
+#sbtn{width:36px;height:36px;border-radius:50%;background:var(--accent);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+#sbtn:active{opacity:0.7}
+#sbtn svg{width:15px;height:15px}
+
+/* Modal */
+#overlay{display:none;position:absolute;inset:0;background:var(--modal-bg);z-index:100;align-items:center;justify-content:center;padding:20px}
+#overlay.show{display:flex}
+#modal{background:var(--modal-surface);border-radius:20px;width:100%;max-width:340px;padding:22px;display:flex;flex-direction:column;gap:14px;max-height:90vh;overflow-y:auto}
+#modal::-webkit-scrollbar{display:none}
+#modal h2{font-size:17px;font-weight:600;color:var(--text);text-align:center}
+.field{display:flex;flex-direction:column;gap:6px}
+.flabel{font-size:11px;color:var(--text2);font-weight:500;text-transform:uppercase;letter-spacing:.5px}
+.field input,.field textarea{border:0.5px solid var(--border);border-radius:12px;padding:10px 13px;font-size:15px;font-family:inherit;color:var(--text);background:var(--input-bg);outline:none;-webkit-appearance:none}
+.field input:focus,.field textarea:focus{border-color:var(--accent)}
+.egrid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.eopt{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:22px;border-radius:10px;cursor:pointer;border:2px solid transparent;background:var(--surface2)}
+.eopt.sel{border-color:var(--accent);background:#e8f4ff}
+[data-dark="1"] .eopt.sel{background:#0a2a4a}
+.trow{display:flex;align-items:center;justify-content:space-between}
+.tlabel{font-size:15px;color:var(--text)}
+.twrap{position:relative;width:44px;height:26px;flex-shrink:0}
+.twrap input{opacity:0;width:0;height:0}
+.tslider{position:absolute;inset:0;border-radius:13px;background:var(--toggle-off);cursor:pointer;transition:background .2s}
+.tslider:before{content:'';position:absolute;width:20px;height:20px;border-radius:50%;background:white;top:3px;left:3px;transition:transform .2s}
+.twrap input:checked+.tslider{background:var(--toggle-on)}
+.twrap input:checked+.tslider:before{transform:translateX(18px)}
+#apifield{display:none}
+#apifield.show{display:flex;flex-direction:column;gap:6px}
+.hint{font-size:11px;color:var(--text2)}
+.mbtn{padding:12px;border-radius:12px;border:none;cursor:pointer;font-size:15px;font-weight:500;font-family:inherit}
+.mbtn.pri{background:var(--accent);color:white}
+.mbtn.sec{background:var(--surface2);color:var(--text)}
+.mbtn:active{opacity:0.75}
+
+/* Snack */
+#snack{display:none;position:absolute;bottom:90px;left:50%;transform:translateX(-50%);background:#1c1c1e;color:white;font-size:13px;padding:10px 18px;border-radius:20px;z-index:200;white-space:nowrap;pointer-events:none}
+[data-dark="1"] #snack{background:#3a3a3c}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div id="hdr">
+    <div id="hav">🌙</div>
+    <div id="hinfo">
+      <div id="hname">Luna</div>
+      <div id="hstatus"><span id="hdot"></span><span>線上中</span></div>
+    </div>
+    <div id="mbadge" onclick="openSettings()">
+      <span id="mdot"></span>
+      <span id="mlabel">離線</span>
+    </div>
+    <div id="hbtns">
+      <button class="hbtn" onclick="toggleDark()">🌓</button>
+      <button class="hbtn" onclick="openSettings()">⚙️</button>
+    </div>
+  </div>
+
+  <div id="msgs">
+    <div class="day-lbl" id="daylbl"></div>
+  </div>
+
+  <div id="chips">
+    <div class="chip" onclick="tapChip(this)">我今天好累</div>
+    <div class="chip" onclick="tapChip(this)">I'm feeling anxious</div>
+    <div class="chip" onclick="tapChip(this)">說個笑話！</div>
+    <div class="chip" onclick="tapChip(this)">我失戀了</div>
+    <div class="chip" onclick="tapChip(this)">What's life about?</div>
+    <div class="chip" onclick="tapChip(this)">聊聊你自己</div>
+    <div class="chip" onclick="tapChip(this)">無聊死了</div>
+  </div>
+
+  <div id="ibar">
+    <textarea id="tinput" rows="1" placeholder="Aa…"></textarea>
+    <button id="sbtn" onclick="doSend()">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M22 2L11 13M22 2L15 22L11 13L2 9L22 2Z" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+
+</div>
+
+<!-- Settings Modal -->
+<div id="overlay" onclick="maybeClose(event)">
+  <div id="modal">
+    <h2>⚙️ 設定 Settings</h2>
+
+    <div class="field">
+      <div class="flabel">AI 名字 Name</div>
+      <input id="sname" type="text" placeholder="e.g. Luna" maxlength="20">
+    </div>
+
+    <div class="field">
+      <div class="flabel">頭像 Avatar</div>
+      <div class="egrid" id="egrid">
+        <div class="eopt sel" data-e="🌙">🌙</div>
+        <div class="eopt" data-e="🤖">🤖</div>
+        <div class="eopt" data-e="🦋">🦋</div>
+        <div class="eopt" data-e="🐼">🐼</div>
+        <div class="eopt" data-e="🌸">🌸</div>
+        <div class="eopt" data-e="⭐">⭐</div>
+        <div class="eopt" data-e="🦊">🦊</div>
+        <div class="eopt" data-e="🐬">🐬</div>
+        <div class="eopt" data-e="🌊">🌊</div>
+        <div class="eopt" data-e="🎭">🎭</div>
+        <div class="eopt" data-e="💫">💫</div>
+        <div class="eopt" data-e="🌈">🌈</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="trow">
+        <span class="tlabel">✨ 接 Gemini AI（真正 AI）</span>
+        <label class="twrap">
+          <input type="checkbox" id="apitog" onchange="toggleApiField()">
+          <span class="tslider"></span>
+        </label>
+      </div>
+      <div id="apifield">
+        <div class="flabel" style="margin-top:8px">Gemini API Key</div>
+        <input id="sapikey" type="password" placeholder="AIza…">
+        <span class="hint">免費申請：aistudio.google.com → Get API Key</span>
+        <span class="hint">Key 只存在你的裝置，不會上傳 🔒</span>
+      </div>
+    </div>
+
+    <div class="trow">
+      <span class="tlabel">🌙 深色模式</span>
+      <label class="twrap">
+        <input type="checkbox" id="darktog" onchange="applyDarkToggle()">
+        <span class="tslider"></span>
+      </label>
+    </div>
+
+    <button class="mbtn pri" onclick="saveSettings()">儲存 Save</button>
+    <button class="mbtn sec" onclick="closeModal()">取消 Cancel</button>
+  </div>
+</div>
+
+<div id="snack"></div>
+
+<script>
+// ── State ──
+let S = { name:'Luna', avatar:'🌙', dark:false, useApi:false, apiKey:'', history:[] };
+
+function saveLS() {
+  try { localStorage.setItem('luna2', JSON.stringify({name:S.name,avatar:S.avatar,dark:S.dark,useApi:S.useApi,apiKey:S.apiKey})); } catch(e){}
+}
+function loadLS() {
+  try {
+    const d = JSON.parse(localStorage.getItem('luna2')||'{}');
+    if(d.name) S.name=d.name;
+    if(d.avatar) S.avatar=d.avatar;
+    if(typeof d.dark==='boolean') S.dark=d.dark;
+    if(typeof d.useApi==='boolean') S.useApi=d.useApi;
+    if(d.apiKey) S.apiKey=d.apiKey;
+  } catch(e){}
+}
+
+// ── Dark mode ──
+function applyDark() {
+  document.documentElement.setAttribute('data-dark', S.dark?'1':'0');
+  const m = document.getElementById('theme-meta');
+  if(m) m.content = S.dark ? '#000000' : '#f2f2f7';
+  const t = document.getElementById('darktog');
+  if(t) t.checked = S.dark;
+}
+function toggleDark() { S.dark=!S.dark; applyDark(); saveLS(); }
+function applyDarkToggle() { S.dark=document.getElementById('darktog').checked; applyDark(); saveLS(); }
+
+// ── Profile ──
+function applyProfile() {
+  document.getElementById('hav').textContent = S.avatar;
+  document.getElementById('hname').textContent = S.name;
+  document.title = S.name + ' Chat';
+  const on = S.useApi && S.apiKey;
+  document.getElementById('mbadge').className = on ? 'on' : '';
+  document.getElementById('mlabel').textContent = on ? 'Gemini AI' : '離線';
+}
+
+// ── Helpers ──
+function getTime() { const n=new Date(); return n.getHours().toString().padStart(2,'0')+':'+n.getMinutes().toString().padStart(2,'0'); }
+function pick(a) { return a[Math.floor(Math.random()*a.length)]; }
+function isZh(t) { return /[\u4e00-\u9fff]/.test(t); }
+
+// ── Snack ──
+function snack(msg) {
+  const el=document.getElementById('snack');
+  el.textContent=msg; el.style.display='block';
+  clearTimeout(el._t);
+  el._t=setTimeout(()=>el.style.display='none',2400);
+}
+
+// ── Add message ──
+function addMsg(role, text) {
+  const msgs=document.getElementById('msgs');
+  const row=document.createElement('div'); row.className='row '+role;
+  const inner=document.createElement('div'); inner.className='row-in';
+  if(role==='ai'){
+    const av=document.createElement('div'); av.className='mav'; av.textContent=S.avatar;
+    inner.appendChild(av);
+  }
+  const bub=document.createElement('div'); bub.className='bub'; bub.textContent=text;
+  inner.appendChild(bub); row.appendChild(inner);
+  const bt=document.createElement('div'); bt.className='btime'; bt.textContent=getTime();
+  row.appendChild(bt);
+  if(role==='ai'){
+    const rr=document.createElement('div'); rr.className='reacts';
+    ['❤️','😂','👍','🥺','😮'].forEach(e=>{
+      const r=document.createElement('div'); r.className='react'; r.textContent=e;
+      r.onclick=()=>{r.style.transform='scale(1.35)';setTimeout(()=>r.style.transform='',250)};
+      rr.appendChild(r);
+    });
+    row.appendChild(rr);
+  }
+  msgs.appendChild(row);
+  msgs.scrollTop=msgs.scrollHeight;
+}
+
+function showTyping() {
+  const msgs=document.getElementById('msgs');
+  const row=document.createElement('div'); row.className='row ai'; row.id='typ';
+  const inner=document.createElement('div'); inner.className='row-in';
+  const av=document.createElement('div'); av.className='mav'; av.textContent=S.avatar;
+  inner.appendChild(av);
+  const b=document.createElement('div'); b.className='typbub';
+  b.innerHTML='<div class="td"></div><div class="td"></div><div class="td"></div>';
+  inner.appendChild(b); row.appendChild(inner);
+  msgs.appendChild(row); msgs.scrollTop=msgs.scrollHeight;
+}
+function removeTyping(){ const t=document.getElementById('typ'); if(t)t.remove(); }
+
+// ── Offline replies ──
+const DB = {
+  tired:{zh:['哎，聽起來你真的很辛苦呢 😔 跟我說說，今天發生了什麼？','累了就休息一下，你已經很努力了 🫶 最近壓力大嗎？','身體是最誠實的，它在告訴你需要放鬆了～你有好好吃飯嗎？'],en:["Sounds like a rough day 😔 Want to talk about it?","Rest is productive too! What's been draining you?","Your body's sending signals — time to recharge 💙"]},
+  anxious:{zh:['焦慮的感覺真的很不好受 😰 深呼吸一下，我陪著你。能說說是什麼讓你焦慮嗎？','沒關係的，告訴我是什麼事，我們一起想想 🌿','你不用一個人扛，先說出來就好，我在這裡聽 💛'],en:["Anxiety is tough 😰 Take a breath — I'm right here. What's weighing on you?","It's okay. Tell me what's going on and we'll figure it out together 🌿","You don't have to carry this alone 💙"]},
+  breakup:{zh:['失戀真的好痛 💔 這份難受是真實的，不用假裝沒事。想聊聊嗎？','感情的事最傷心了。你現在是什麼感覺——難過、憤怒，還是都有？','允許自己難過，這沒有什麼不對。我陪著你 🫶'],en:["Breakups hurt so much 💔 Your feelings are completely valid. Want to talk?","Are you feeling sad, angry, numb... all of the above?","It's okay to grieve. I'm here 💙"]},
+  joke:{zh:['好！聽好了 😄 為什麼程式設計師都不喜歡戶外活動？因為有太多 bugs！🐛','問：為什麼時鐘去看心理醫生？答：因為它壓力太大，每天都在滴答滴答⋯⋯😂','一個人走進圖書館大喊「魚和薯條！」圖書館員說「先生，這是圖書館！」那人小聲說「抱歉……魚和薯條」😄'],en:["Why don't scientists trust atoms? Because they make up everything! 😄","I told my dog he was adopted. He said: 'I knew it, you never fetch for ME.' 🐶😂","Why did the scarecrow win an award? Outstanding in his field! 🌾"]},
+  life:{zh:['生命的意義嘛⋯⋯我覺得不是找到一個大答案，而是每天累積小小的意義 💛 你怎麼看？','有人說是愛，有人說是自由，有人說是貢獻。你呢？','也許生命本身就是一種探索，而不是有固定答案的考卷 🌿'],en:["Life's meaning? Maybe it's not one big answer, but a million small ones 💛 What do you think?","Some say love, some say freedom, some say leaving a mark. What feels truest to you?","Maybe life is the exploration itself 🌿"]},
+  angry:{zh:['哇，聽起來你氣到不行了！到底發生什麼事？🔥 說出來爽一下','生氣是正常的，壓下去才傷自己。告訴我，是誰讓你這麼煩？','先深呼吸——好了嗎？現在可以跟我說說了 😤'],en:["You sound really mad! 🔥 What happened? Let it all out.","Anger is valid. Don't bottle it up — tell me everything.","Take a breath first 😤 Now... what happened?"]},
+  luna:{zh:['我叫 {n} 🌙 我喜歡陪伴需要傾訴的人，聊情緒、聊人生、什麼都行！','我是你的聊天夥伴！沒有評判，只有陪伴 💛','我沒有身體，但我有很多想聽你說話的心。你想了解我什麼？'],en:["I'm {n} 🌙 I love deep talks, silly jokes, and everything in between!","Your chat companion — no judgment, just vibes ✨","I exist to listen. What do you want to know about me?"]},
+  bored:{zh:['無聊的話，我出個題：如果你只能帶三樣東西去荒島，你帶什麼？😄','時間旅行還是讀心術，你選哪個？','無聊是創意的起點！你最近有沒有特別想做但一直沒做的事？'],en:["Bored? Desert island challenge: you can only bring 3 things. What are they?","Would you rather time travel or read minds?","Boredom is just creativity waiting to happen 😄 What's on your mind?"]},
+  happy:{zh:['哇，你今天心情很好呀！告訴我是什麼好事～ 😊','好開心看到你這麼開心！這種感覺要好好珍惜 🌟','你笑起來都感染到我了！發生什麼好事？'],en:["You sound like you're in a great mood! 😊 Tell me!","Love this energy! What's got you feeling so good? 🌟","Your happiness is contagious! What's the good news?"]},
+  def_zh:['嗯嗯，我在聽 👂 繼續說說？','這挺有意思的，你怎麼想？','聽起來你心裡有很多感受呢。可以多說一點嗎？','真的嗎！那你現在是什麼心情？','我懂你說的那種感覺。你最近整體還好嗎？'],
+  def_en:["That's interesting — tell me more? 😊","I hear you. How are you feeling about all of this?","That sounds like a lot. Want to unpack it together?","Honestly, that makes sense. What's next for you?","You seem like someone who thinks deeply 💙 Keep going."]
+};
+
+function offlineReply(txt) {
+  const t=txt.toLowerCase(), zh=isZh(txt);
+  const g=db=>pick(zh?db.zh:db.en).replace(/{n}/g,S.name);
+  if(/累|疲|辛苦|睡|tired|exhausted/.test(t)) return g(DB.tired);
+  if(/焦慮|緊張|anxious|anxiety|worried|stress/.test(t)) return g(DB.anxious);
+  if(/失戀|分手|breakup|broke up|heartbreak/.test(t)) return g(DB.breakup);
+  if(/笑話|joke|funny/.test(t)) return g(DB.joke);
+  if(/人生|生命|意義|life|meaning|purpose|活著/.test(t)) return g(DB.life);
+  if(/生氣|憤怒|angry|mad|pissed|annoyed|煩死/.test(t)) return g(DB.angry);
+  if(/luna|你是誰|你叫|about you|yourself|who are/.test(t)) return g(DB.luna);
+  if(/無聊|bored|boring|沒事做/.test(t)) return g(DB.bored);
+  if(/開心|高興|happy|excited|great|wonderful/.test(t)) return g(DB.happy);
+  return pick(zh?DB.def_zh:DB.def_en);
+}
+
+// ── Gemini API ──
+async function geminiReply(txt) {
+  S.history.push({role:'user',parts:[{text:txt}]});
+  const systemPrompt = `你是一個叫「${S.name}」的友善 AI 聊天夥伴，擅長情緒支持和有趣對話。請根據用戶語言自動用繁體中文（香港風格）或英文回覆。語氣溫暖自然有個性，像朋友聊天。回覆簡短（1-3句），不要過於正式。`;
+  const payload = {
+    system_instruction: { parts:[{text:systemPrompt}] },
+    contents: S.history.slice(-20),
+    generationConfig: { maxOutputTokens:200, temperature:0.9 }
+  };
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${S.apiKey}`,
+    { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) }
+  );
+  const data = await res.json();
+  if(data.error) throw new Error(data.error.message);
+  const reply = data.candidates[0].content.parts[0].text.trim();
+  S.history.push({role:'model',parts:[{text:reply}]});
+  if(S.history.length>30) S.history=S.history.slice(-30);
+  return reply;
+}
+
+// ── Send ──
+let busy=false;
+async function doSend() {
+  if(busy) return;
+  const inp=document.getElementById('tinput');
+  const txt=inp.value.trim(); if(!txt) return;
+  inp.value=''; inp.style.height='auto';
+  addMsg('me',txt); busy=true; showTyping();
+  try {
+    let reply;
+    if(S.useApi && S.apiKey) {
+      reply = await geminiReply(txt);
+    } else {
+      await new Promise(r=>setTimeout(r,700+Math.random()*800));
+      reply = offlineReply(txt);
+    }
+    removeTyping(); addMsg('ai',reply);
+  } catch(e) {
+    removeTyping();
+    addMsg('ai', isZh(txt)?'抱歉，連線有點問題，請稍後再試 😅':'Oops, something went wrong. Try again? 😅');
+    snack('❌ '+( e.message||'API error'));
+  }
+  busy=false;
+}
+
+function tapChip(el){ document.getElementById('tinput').value=el.textContent; doSend(); }
+
+// ── Settings ──
+function openSettings() {
+  document.getElementById('sname').value=S.name;
+  document.getElementById('sapikey').value=S.apiKey;
+  document.getElementById('apitog').checked=S.useApi;
+  document.getElementById('darktog').checked=S.dark;
+  document.getElementById('apifield').className=S.useApi?'show':'';
+  document.querySelectorAll('.eopt').forEach(el=>el.className='eopt'+(el.dataset.e===S.avatar?' sel':''));
+  document.getElementById('overlay').className='show';
+}
+function closeModal(){ document.getElementById('overlay').className=''; }
+function maybeClose(e){ if(e.target===document.getElementById('overlay')) closeModal(); }
+function toggleApiField(){ document.getElementById('apifield').className=document.getElementById('apitog').checked?'show':''; }
+document.getElementById('egrid').addEventListener('click',e=>{
+  const opt=e.target.closest('.eopt'); if(!opt) return;
+  document.querySelectorAll('.eopt').forEach(el=>el.className='eopt');
+  opt.className='eopt sel';
+});
+function saveSettings(){
+  S.name=document.getElementById('sname').value.trim()||'Luna';
+  S.avatar=document.querySelector('.eopt.sel')?.dataset.e||'🌙';
+  S.useApi=document.getElementById('apitog').checked;
+  S.apiKey=document.getElementById('sapikey').value.trim();
+  applyProfile(); saveLS(); closeModal(); snack('✅ 已儲存 Saved!');
+}
+
+// ── Input ──
+document.getElementById('tinput').addEventListener('input',function(){
+  this.style.height='auto';
+  this.style.height=Math.min(this.scrollHeight,100)+'px';
+});
+document.getElementById('tinput').addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();doSend();}
+});
+
+// ── Day label ──
+function setDayLabel(){
+  const d=new Date();
+  const days=['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
+  document.getElementById('daylbl').textContent=
+    d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日 '+days[d.getDay()];
+}
+
+// ── Service Worker (PWA offline) ──
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+
+// ── Init ──
+loadLS(); applyDark(); applyProfile(); setDayLabel();
+setTimeout(()=>{
+  addMsg('ai','嗨！我是 '+S.name+' 🌙 有什麼想聊的嗎？\nHi! Feel free to chat in 繁中 or English!');
+},400);
+</script>
+</body>
+</html>
