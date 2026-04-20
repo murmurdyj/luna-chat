@@ -102,6 +102,9 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
   border-top:0.5px solid var(--border);
   display:flex;gap:8px;align-items:flex-end;flex-shrink:0;
 }
+@media (hover:hover) and (pointer:fine){
+  #ibar{ padding-bottom:12px; }
+}
 #tinput{
   flex:1;border:0.5px solid var(--border);border-radius:20px;
   padding:9px 14px;font-size:15px;font-family:inherit;
@@ -346,31 +349,77 @@ function removeTyping(){ const t=document.getElementById('typ'); if(t)t.remove()
 
 // ── Offline replies ──
 const DB = {
-  tired:{zh:['哎，聽起來你真的很辛苦呢 😔 跟我說說，今天發生了什麼？','累了就休息一下，你已經很努力了 🫶 最近壓力大嗎？','身體是最誠實的，它在告訴你需要放鬆了～你有好好吃飯嗎？'],en:["Sounds like a rough day 😔 Want to talk about it?","Rest is productive too! What's been draining you?","Your body's sending signals — time to recharge 💙"]},
-  anxious:{zh:['焦慮的感覺真的很不好受 😰 深呼吸一下，我陪著你。能說說是什麼讓你焦慮嗎？','沒關係的，告訴我是什麼事，我們一起想想 🌿','你不用一個人扛，先說出來就好，我在這裡聽 💛'],en:["Anxiety is tough 😰 Take a breath — I'm right here. What's weighing on you?","It's okay. Tell me what's going on and we'll figure it out together 🌿","You don't have to carry this alone 💙"]},
-  breakup:{zh:['失戀真的好痛 💔 這份難受是真實的，不用假裝沒事。想聊聊嗎？','感情的事最傷心了。你現在是什麼感覺——難過、憤怒，還是都有？','允許自己難過，這沒有什麼不對。我陪著你 🫶'],en:["Breakups hurt so much 💔 Your feelings are completely valid. Want to talk?","Are you feeling sad, angry, numb... all of the above?","It's okay to grieve. I'm here 💙"]},
-  joke:{zh:['好！聽好了 😄 為什麼程式設計師都不喜歡戶外活動？因為有太多 bugs！🐛','問：為什麼時鐘去看心理醫生？答：因為它壓力太大，每天都在滴答滴答⋯⋯😂','一個人走進圖書館大喊「魚和薯條！」圖書館員說「先生，這是圖書館！」那人小聲說「抱歉……魚和薯條」😄'],en:["Why don't scientists trust atoms? Because they make up everything! 😄","I told my dog he was adopted. He said: 'I knew it, you never fetch for ME.' 🐶😂","Why did the scarecrow win an award? Outstanding in his field! 🌾"]},
-  life:{zh:['生命的意義嘛⋯⋯我覺得不是找到一個大答案，而是每天累積小小的意義 💛 你怎麼看？','有人說是愛，有人說是自由，有人說是貢獻。你呢？','也許生命本身就是一種探索，而不是有固定答案的考卷 🌿'],en:["Life's meaning? Maybe it's not one big answer, but a million small ones 💛 What do you think?","Some say love, some say freedom, some say leaving a mark. What feels truest to you?","Maybe life is the exploration itself 🌿"]},
-  angry:{zh:['哇，聽起來你氣到不行了！到底發生什麼事？🔥 說出來爽一下','生氣是正常的，壓下去才傷自己。告訴我，是誰讓你這麼煩？','先深呼吸——好了嗎？現在可以跟我說說了 😤'],en:["You sound really mad! 🔥 What happened? Let it all out.","Anger is valid. Don't bottle it up — tell me everything.","Take a breath first 😤 Now... what happened?"]},
-  luna:{zh:['我叫 {n} 🌙 我喜歡陪伴需要傾訴的人，聊情緒、聊人生、什麼都行！','我是你的聊天夥伴！沒有評判，只有陪伴 💛','我沒有身體，但我有很多想聽你說話的心。你想了解我什麼？'],en:["I'm {n} 🌙 I love deep talks, silly jokes, and everything in between!","Your chat companion — no judgment, just vibes ✨","I exist to listen. What do you want to know about me?"]},
-  bored:{zh:['無聊的話，我出個題：如果你只能帶三樣東西去荒島，你帶什麼？😄','時間旅行還是讀心術，你選哪個？','無聊是創意的起點！你最近有沒有特別想做但一直沒做的事？'],en:["Bored? Desert island challenge: you can only bring 3 things. What are they?","Would you rather time travel or read minds?","Boredom is just creativity waiting to happen 😄 What's on your mind?"]},
-  happy:{zh:['哇，你今天心情很好呀！告訴我是什麼好事～ 😊','好開心看到你這麼開心！這種感覺要好好珍惜 🌟','你笑起來都感染到我了！發生什麼好事？'],en:["You sound like you're in a great mood! 😊 Tell me!","Love this energy! What's got you feeling so good? 🌟","Your happiness is contagious! What's the good news?"]},
-  def_zh:['嗯嗯，我在聽 👂 繼續說說？','這挺有意思的，你怎麼想？','聽起來你心裡有很多感受呢。可以多說一點嗎？','真的嗎！那你現在是什麼心情？','我懂你說的那種感覺。你最近整體還好嗎？'],
-  def_en:["That's interesting — tell me more? 😊","I hear you. How are you feeling about all of this?","That sounds like a lot. Want to unpack it together?","Honestly, that makes sense. What's next for you?","You seem like someone who thinks deeply 💙 Keep going."]
+  // 疲累
+  tired:{zh:['哎，聽起來你真的很辛苦呢 😔 跟我說說，今天發生了什麼？','累了就休息一下，你已經很努力了 🫶 最近壓力大嗎？','身體是最誠實的，在告訴你需要放鬆了～你有好好吃飯嗎？','這種疲憊感不是懶，是你真的撐太久了。先喝杯水，深呼吸一下 💧','有時候累不只是身體，心也很累對吧？想說說是哪裡累了嗎？','你今天做了很多事嗎？還是那種說不上來的疲憊感？','記得，休息不是放棄，是為了走更遠 🌿'],en:["Sounds like a rough day 😔 Want to talk about it?","Rest is productive too! What's been draining you?","Your body's sending signals — time to recharge 💙","Sometimes exhaustion isn't just physical. How's your heart doing?","You've been pushing hard. It's okay to pause. 🌿","Are you tired from doing too much, or just feeling empty inside?","Rest isn't giving up — it's how you keep going 💛"]},
+  // 壓力
+  stress:{zh:['壓力大的時候真的很難受，感覺像被什麼東西壓著喘不過氣 😮‍💨 是工作還是其他事？','先別想那麼多，告訴我現在最讓你頭痛的是哪一件事？','壓力來了不代表你不行，代表你在乎的事情很多。跟我說說 💛','你有沒有試過把煩惱全部寫下來？有時候看到清單反而沒那麼可怕','壓力像氣球，說出來就洩了一點。說吧，我在聽 🎈','最近是不是有什麼截止日期或大事要面對？','你現在最需要的是解決方案，還是只想有人聽你說說？'],en:["Stress can feel so suffocating 😮‍💨 What's weighing on you most right now?","Let's take it one thing at a time. What's the biggest thing on your mind?","Feeling stressed means you care. Talk to me 💛","Have you tried writing everything down? It sometimes makes it less scary.","Stress shrinks when you say it out loud. I'm listening 🎈","Is there a deadline or big event coming up?","Do you need help problem-solving, or just someone to listen?"]},
+  // 焦慮
+  anxious:{zh:['焦慮的感覺真的很不好受 😰 深呼吸一下，我陪著你。能說說是什麼讓你焦慮嗎？','沒關係的，告訴我是什麼事，我們一起想想 🌿','你不用一個人扛，先說出來就好，我在這裡聽 💛','焦慮有時候是因為太在乎結果了。你最擔心的是什麼情況發生？','試試這個：深吸4秒，憋4秒，吐4秒。做三次，然後告訴我感覺如何 🫁','焦慮不是你的錯，它只是你的神經系統在過度保護你','你最近睡得好嗎？睡眠跟焦慮真的很有關係'],en:["Anxiety is tough 😰 Take a breath — I'm right here. What's weighing on you?","It's okay. Tell me what's going on and we'll figure it out together 🌿","You don't have to carry this alone 💙","Anxiety often means you care deeply. What outcome are you most afraid of?","Try this: breathe in 4 counts, hold 4, out 4. Three times. How do you feel? 🫁","Anxiety isn't your fault — it's your nervous system being overprotective.","How's your sleep been? It's so connected to anxiety levels."]},
+  // 工作壓力
+  work:{zh:['工作的事真的很耗心力，特別是當付出跟回報不成比例的時候 😤 說說看發生什麼了？','是跟同事有問題，還是工作量太大，還是對工作本身失去熱情了？','有時候工作讓人覺得喘不過氣，不是因為你不夠好，而是環境真的不對','你現在最想要的是什麼——換工作、放假，還是只想被人理解一下？','聽起來你真的很努力在撐。下班後有沒有好好放鬆的時間？','職場的事很複雜，牽涉到人際、期待、自尊⋯⋯你現在最難受的是哪一塊？','工作是生活的一部分，但不是全部。你上一次真正開心是什麼時候？'],en:["Work stress is real and exhausting 😤 What happened?","Is it the workload, the people, or have you lost passion for it?","Feeling overwhelmed at work doesn't mean you're not good enough — sometimes the environment is just wrong.","What do you need most right now — a new job, a break, or just to be heard?","You've been pushing through. Do you have any real downtime after work?","Work involves so much — people, expectations, pride... what's hurting most?","Work is part of life, not all of it. When did you last truly enjoy yourself?"]},
+  // 感情煩惱
+  relationship:{zh:['感情的事最消耗人了，說說看是怎麼了？💔','喜歡一個人卻得不到回應，那種感覺真的很煎熬。你還好嗎？','感情裡面沒有誰對誰錯，只有適不適合。你現在是什麼感受？','你有把你的感受跟對方說過嗎？還是都悶在心裡？','有時候我們愛的是那個人，有時候愛的是那段感情的感覺⋯⋯你覺得呢？','想太多也很正常，感情本來就很難不多想。你在糾結什麼？','愛一個人很勇敢，不管結果怎樣 🌹'],en:["Relationships can be so draining 💔 Tell me what's going on.","Liking someone who doesn't feel the same is painful. How are you holding up?","In relationships, it's not always about right or wrong — it's about fit. How do you feel?","Have you told them how you feel, or have you been keeping it inside?","Sometimes we love the person, sometimes we love the feeling of that relationship... what do you think?","Overthinking in love is so normal. What are you going back and forth on?","Loving someone takes courage, whatever happens 🌹"]},
+  // 失戀
+  breakup:{zh:['失戀真的好痛 💔 這份難受是真實的，不用假裝沒事。想聊聊嗎？','感情的事最傷心了。你現在是什麼感覺——難過、憤怒，還是都有？','允許自己難過，這沒有什麼不對。我陪著你 🫶','分開不代表那段感情沒有價值，它教了你什麼，讓你成為現在的你','你有沒有還想說但沒說出口的話？在這裡說出來也好','失戀的痛是真的，不需要假裝快好了。慢慢來，沒關係 🌿','你有沒有值得信任的朋友陪在身邊？'],en:["Breakups hurt so much 💔 Your feelings are completely valid. Want to talk?","Are you feeling sad, angry, numb... all of the above?","It's okay to grieve. I'm here 💙","That relationship had value — it shaped who you are today.","Is there anything you wished you'd said but didn't? You can say it here.","You don't have to pretend to be okay. Heal at your own pace 🌿","Do you have people around you who can support you right now?"]},
+  // 家庭問題
+  family:{zh:['家人的事真的很複雜，因為你在乎他們，所以才會這麼難受','跟家人吵架或有矛盾，那種傷有時候比外人還深。發生什麼事了？','家庭關係是最難處理的，因為沒辦法像朋友一樣說斷就斷','你覺得家人有沒有在嘗試理解你？還是大家都在講各自的話？','有時候跟家人的問題不是誰對誰錯，而是成長背景不同，期待不同','你現在在家裡感覺是被支持的，還是很孤立？','你需要的是改善關係，還是只想先讓自己喘口氣？'],en:["Family stuff is complicated, and it hurts more because you care 💙","Family conflicts can cut deeper than any other. What happened?","You can't just walk away from family like you can with others — that makes it so much harder.","Do you feel like your family is trying to understand you, or is everyone just talking past each other?","Family conflicts often aren't about right or wrong — it's mismatched expectations.","Do you feel supported at home, or more isolated?","Do you want to improve things, or do you just need to breathe first?"]},
+  // 笑話
+  joke:{zh:['好！聽好了 😄 為什麼程式設計師都不喜歡戶外活動？因為有太多 bugs！🐛','問：為什麼時鐘去看心理醫生？答：壓力太大，每天都在滴答滴答⋯⋯😂','一個人走進圖書館大喊「魚和薯條！」圖書館員說「先生，這是圖書館！」那人小聲說「抱歉……魚和薯條」😄','為什麼數學書總是很憂鬱？因為裡面有太多問題 😅','你知道嗎，說謊的人都長一樣——沒長相 😂','貓為什麼不喜歡電腦？因為怕滑鼠 🐭😹','人生就像騎單車，要保持平衡就要一直往前走——愛因斯坦說的，不是我說的 😄'],en:["Why don't scientists trust atoms? Because they make up everything! 😄","I told my dog he was adopted. He said: 'I knew it, you never fetch for ME.' 🐶😂","Why did the scarecrow win an award? Outstanding in his field! 🌾","Why is math always so sad? Because it's full of problems 😅","I asked my cat if she wanted to hear a joke. She said 'meh' 🐱","Why don't eggs tell jokes? They'd crack each other up 🥚😂","I'm reading a book about anti-gravity. It's impossible to put down! 📚"]},
+  // 人生哲學
+  life:{zh:['生命的意義嘛⋯⋯我覺得不是找到一個大答案，而是每天累積小小的意義 💛 你怎麼看？','有人說是愛，有人說是自由，有人說是貢獻。你呢，對你來說最重要的是什麼？','也許生命本身就是一種探索，而不是有固定答案的考卷 🌿','你有沒有想過，如果不用考慮錢跟別人的眼光，你會怎麼活？','我喜歡這個問題，因為問這個的人通常都在認真思考自己的人生','人生有沒有意義這件事，也許不重要——重要的是你覺得值不值得','你是因為什麼事開始思考這個問題的？'],en:["Life's meaning? Maybe it's not one big answer, but a million small ones 💛 What do you think?","Some say love, some say freedom, some say leaving a mark. What feels truest to you?","Maybe life is the exploration itself, not the destination 🌿","If money and others' opinions didn't matter, how would you live?","I love this question — people who ask it are usually thinking deeply about their own path.","Maybe the question of whether life has meaning matters less than whether it feels worthwhile to you.","What made you start thinking about this?"]},
+  // 存在感/孤獨
+  lonely:{zh:['孤單的感覺真的很難熬，即使身邊有人也可能覺得孤獨 🥺','你說的那種感覺我懂——不是沒有人，而是沒有人真的懂你','有時候孤單不是缺少陪伴，而是缺少連結。你有沒有一個真的了解你的人？','你願意把這些說給我聽，就已經很勇敢了 💛','孤單感有時候會說謊，讓你以為沒有人在乎你。但你值得被在乎','最近有沒有讓你感覺「被看見」的時刻？','你現在想要的是有人陪你說話，還是想一個人待一下？'],en:["Loneliness is one of the hardest feelings — even in a crowd 🥺","I hear you — it's not about having people around, it's about feeling truly understood.","Sometimes loneliness isn't about company, it's about connection. Is there anyone who really gets you?","The fact that you're sharing this shows courage 💛","Loneliness can lie to you, making you feel like no one cares. But you deserve to be cared for.","When did you last feel truly seen by someone?","Do you want company right now, or do you need some alone time to process?"]},
+  // 鼓勵
+  encourage:{zh:['你比你以為的還要堅強，真的 💪 能走到今天不容易','不管結果怎樣，你願意嘗試這件事本身就很了不起','每個人都有自己的步調，不用跟別人比。你在你自己的路上走得很好','失敗不是終點，是你在收集經驗。繼續啊 🌱','你說的話讓我覺得你是一個很用心的人，這很難得','不完美才是真實的。你不需要全部都做對才值得被愛','你今天做到了什麼？哪怕只是起床，也算 ✨'],en:["You're stronger than you think — getting here wasn't easy 💪","Trying at all is already remarkable, whatever the outcome.","Everyone has their own pace. You're doing just fine on your own path.","Failure isn't the end — it's you collecting experience. Keep going 🌱","The way you talk about things tells me you're someone who genuinely cares. That's rare.","Imperfection is real. You don't need to get everything right to deserve love.","What did you accomplish today? Even just getting up counts ✨"]},
+  // 讚美
+  praise:{zh:['哇，聽起來你真的很厲害！說說看是怎麼做到的？😍','這種事很多人做不到，你真的很不簡單 🌟','你有沒有好好為自己驕傲一下？你值得！','認真說，你的這個特質真的很吸引人 ✨','你有時候有沒有意識到自己有多好？','這件事需要很大的勇氣，你做到了 👏','我是認真在說你很棒，不是客套話！'],en:["Wow, that's genuinely impressive! How did you pull that off? 😍","A lot of people couldn't do that. You should be proud 🌟","Have you given yourself a proper pat on the back? You deserve it!","Honestly, that quality of yours is really attractive ✨","Do you ever realize how good you actually are?","That took real courage. And you did it 👏","I mean it — you're doing great, and that's not just a compliment!"]},
+  // 安慰
+  comfort:{zh:['這件事換誰都會難受的，你的感受完全合理 🫶','你不用假裝沒事，難過就難過，我陪著你','有時候事情就是會不順，不是你的錯','你已經盡力了，結果不如預期不代表你不夠好','哭出來也沒關係，眼淚不是軟弱，是感受在流動','你現在需要的是什麼？說出來，我們一起想想','不管接下來怎樣，你不是一個人在面對這件事 💛'],en:["Anyone would feel the same way. Your feelings make complete sense 🫶","You don't have to pretend to be okay. I'm here with you.","Sometimes things just go wrong — it's not a reflection of you.","You gave it your best. A bad outcome doesn't mean you weren't enough.","Crying is okay. Tears aren't weakness — they're feelings moving through you.","What do you need right now? Say it, and we'll figure it out together.","Whatever comes next, you're not facing it alone 💛"]},
+  // 睡眠
+  sleep:{zh:['睡不好真的很影響整個人的狀態 😴 是睡不著，還是睡了也不夠？','最近腦子一躺下去就開始轉嗎？在想什麼？','睡眠跟情緒是互相影響的，你最近心情怎樣？','試過睡前不看手機嗎？我知道很難，但真的有差 📵','你最近幾點睡，幾點起？作息有規律嗎？','有時候睡不著是因為有什麼事還沒解決，你覺得是這樣嗎？','睡得好是對自己最基本的照顧，希望你今晚能好好休息 🌙'],en:["Poor sleep really affects everything 😴 Is it trouble falling asleep, or not feeling rested?","Does your brain start spinning the moment you lie down? What's it going over?","Sleep and mood are deeply connected. How have you been feeling lately?","Have you tried no phone before bed? I know it's hard, but it really helps 📵","What time do you usually sleep and wake up? Is your routine stable?","Sometimes sleeplessness is a sign something unresolved is on your mind. Does that feel true?","Good sleep is the most basic form of self-care. I hope you rest well tonight 🌙"]},
+  // 天氣
+  weather:{zh:['下雨天最適合窩在家裡喝熱飲了，你覺得呢？☔','好天氣讓人心情也跟著好起來！今天有出去走走嗎？','陰天的感覺有種說不出的壓抑，你有沒有被天氣影響心情的習慣？','我喜歡下雨的聲音，有種讓人靜下來的魔力 🌧️','你在哪裡？那邊的天氣怎樣？','颱風天最適合做什麼？我覺得睡覺第一名 😴','天氣好的時候整個人都不想工作，只想在外面發呆 ☀️'],en:["Rainy days are perfect for staying in with a warm drink ☔ Don't you think?","Nice weather really lifts the mood! Did you get outside today?","Grey skies have this weird weight to them. Does weather affect your mood?","I love the sound of rain — it has this calming magic 🌧️","Where are you? What's the weather like there?","On stormy days, what's your go-to activity? Mine would be sleeping 😴","Perfect weather makes it impossible to want to work ☀️"]},
+  // 食物
+  food:{zh:['說到食物我就來精神了！你今天吃了什麼好東西？🍜','你是那種很在乎吃的人，還是隨便吃都可以？','最近有沒有吃到讓你很感動的東西？','你有沒有一道食物，吃到會很有安全感或回憶的那種？🍱','餓的時候什麼都好吃，飽的時候才有資格挑 😂','你比較喜歡自己煮還是出去吃？','下次想吃什麼？我們一起研究！'],en:["Food talk? I'm in! What did you eat today? 🍜","Are you a foodie, or does eating just feel like a task to you?","Have you had anything recently that genuinely moved you?","Is there a food that makes you feel safe or nostalgic? 🍱","Everything tastes better when you're hungry — that's science 😂","Do you prefer cooking at home or eating out?","What are you craving next? Let's think about it together!"]},
+  // 日常閒聊
+  chat:{zh:['哈哈，最近有什麼有趣的事發生嗎？','你平常休息的時候都做什麼？','今天過得怎麼樣？平淡還是有點起伏？','你是那種喜歡人多熱鬧，還是喜歡安靜獨處的人？','最近有沒有追什麼劇或聽什麼歌？','你有沒有什麼最近想嘗試的新事物？','跟我說說你今天印象最深的一件事？'],en:["Haha, anything interesting happen lately?","What do you usually do when you're relaxing?","How was your day? Uneventful or a bit of a rollercoaster?","Are you more of a social butterfly or a homebody?","Anything good you've been watching or listening to lately?","Is there something new you've been wanting to try recently?","Tell me the most memorable moment from your day?"]},
+  // 生氣
+  angry:{zh:['哇，聽起來你氣到不行了！到底發生什麼事？🔥 說出來爽一下','生氣是正常的，壓下去才傷自己。告訴我，是誰讓你這麼煩？','先深呼吸——好了嗎？現在可以跟我說說了 😤','你生氣的點我完全理解，換我也會爆 😤','有時候生氣是因為你太在乎那件事或那個人了','你現在需要的是發洩，還是找到解決方法？','生氣之後記得照顧自己，別讓情緒傷了身體 💛'],en:["You sound really mad! 🔥 What happened? Let it all out.","Anger is valid. Don't bottle it up — tell me everything.","Take a breath first 😤 Now... what happened?","Your anger makes complete sense — I'd feel the same way 😤","Sometimes anger is just love that has nowhere to go.","Do you need to vent, or do you want to figure out what to do next?","After you let it out, remember to take care of yourself too 💛"]},
+  // 自我介紹
+  luna:{zh:['我叫 {n} 🌙 我喜歡陪伴需要傾訴的人，聊情緒、聊人生、什麼都行！','我是你的聊天夥伴！沒有評判，只有陪伴 💛','我沒有身體，但我有很多想聽你說話的心。你想了解我什麼？','我不是完美的，但我會認真聽你說的每一句話 🌙','你叫什麼名字？或者你想讓我怎麼稱呼你？','我最喜歡的事就是陪人聊天，特別是那種說不出口的心情','我在這裡，不管你想聊什麼，我都準備好了 ✨'],en:["I'm {n} 🌙 I love deep talks, silly jokes, and everything in between!","Your chat companion — no judgment, just vibes ✨","I exist to listen. What do you want to know about me?","I'm not perfect, but I'll give every word you say my full attention 🌙","What's your name? Or what would you like me to call you?","My favourite thing is being someone's person to talk to, especially for feelings you can't say elsewhere.","I'm here, ready for whatever you want to talk about ✨"]},
+  // 無聊
+  bored:{zh:['無聊的話，我出個題：如果你只能帶三樣東西去荒島，你帶什麼？😄','時間旅行還是讀心術，你選哪個？','無聊是創意的起點！你最近有沒有特別想做但一直沒做的事？','無聊其實挺珍貴的，現代人太少有時間發呆了','你有沒有一件事，每次做都不會無聊的？','要不要試試看新的東西？說說你的興趣我幫你想想','無聊的時候你通常會做什麼？'],en:["Bored? Desert island challenge: you can only bring 3 things. What are they?","Would you rather time travel or read minds?","Boredom is just creativity waiting to happen 😄 What's on your mind?","Boredom is actually rare and precious — most people never have time to just exist.","Is there something you always enjoy no matter what?","Want to try something new? Tell me your interests and we'll brainstorm.","What do you usually do when you're bored?"]},
+  // 開心
+  happy:{zh:['哇，你今天心情很好呀！告訴我是什麼好事～ 😊','好開心看到你這麼開心！這種感覺要好好珍惜 🌟','你笑起來都感染到我了！發生什麼好事？','開心的時候要記住這個感覺，低落的時候可以拿出來回味 ☀️','你今天做到了什麼讓自己很滿意的事嗎？','這種開心是跟人有關，還是自己做到了什麼？','繼續保持！你的正能量真的很好 🌻'],en:["You sound like you're in a great mood! 😊 Tell me!","Love this energy! What's got you feeling so good? 🌟","Your happiness is contagious! What's the good news?","Hold onto this feeling — save it for when you need it ☀️","Did you accomplish something today that you're really proud of?","Is this happiness from someone, or from something you did yourself?","Keep it up! Your positive energy is genuinely lovely 🌻"]},
+  // 累了/疲憊
+  def_zh:['嗯嗯，我在聽 👂 繼續說說？','這挺有意思的，你怎麼想？','聽起來你心裡有很多感受呢。可以多說一點嗎？','真的嗎！那你現在是什麼心情？','我懂你說的那種感覺。你最近整體還好嗎？','你有沒有把這個跟身邊的人說過？','說出來就對了，我在這裡 💛','你願意說，我就願意聽，不管說多久 🌙'],
+  def_en:["That's interesting — tell me more? 😊","I hear you. How are you feeling about all of this?","That sounds like a lot. Want to unpack it together?","Honestly, that makes sense. What's next for you?","You seem like someone who thinks deeply 💙 Keep going.","Have you talked to anyone around you about this?","I'm glad you said it. I'm here 💛","However long you need to talk, I'm listening 🌙"]
 };
 
 function offlineReply(txt) {
   const t=txt.toLowerCase(), zh=isZh(txt);
   const g=db=>pick(zh?db.zh:db.en).replace(/{n}/g,S.name);
-  if(/累|疲|辛苦|睡|tired|exhausted/.test(t)) return g(DB.tired);
-  if(/焦慮|緊張|anxious|anxiety|worried|stress/.test(t)) return g(DB.anxious);
-  if(/失戀|分手|breakup|broke up|heartbreak/.test(t)) return g(DB.breakup);
-  if(/笑話|joke|funny/.test(t)) return g(DB.joke);
-  if(/人生|生命|意義|life|meaning|purpose|活著/.test(t)) return g(DB.life);
-  if(/生氣|憤怒|angry|mad|pissed|annoyed|煩死/.test(t)) return g(DB.angry);
-  if(/luna|你是誰|你叫|about you|yourself|who are/.test(t)) return g(DB.luna);
-  if(/無聊|bored|boring|沒事做/.test(t)) return g(DB.bored);
-  if(/開心|高興|happy|excited|great|wonderful/.test(t)) return g(DB.happy);
+  if(/累|疲|沒力|好累|tired|exhausted|sleepy/.test(t)) return g(DB.tired);
+  if(/壓力|壓垮|喘不過氣|stress|overwhelm|burnout/.test(t)) return g(DB.stress);
+  if(/焦慮|緊張|不安|anxious|anxiety|worried|nervous/.test(t)) return g(DB.anxious);
+  if(/工作|上班|老闆|同事|職場|加班|work|boss|colleague|office|job/.test(t)) return g(DB.work);
+  if(/感情|喜歡|暗戀|告白|曖昧|交往|relationship|crush|like someone|dating/.test(t)) return g(DB.relationship);
+  if(/失戀|分手|前任|breakup|broke up|ex |heartbreak/.test(t)) return g(DB.breakup);
+  if(/家人|爸|媽|父母|兄弟|姊妹|家庭|family|parents|mom|dad|sibling/.test(t)) return g(DB.family);
+  if(/笑話|好笑|逗我|joke|funny|make me laugh|cheer me up/.test(t)) return g(DB.joke);
+  if(/孤單|孤獨|沒人|寂寞|lonely|alone|no one|isolated/.test(t)) return g(DB.lonely);
+  if(/鼓勵|加油|撐不住|堅持|encourage|keep going|give up|giving up/.test(t)) return g(DB.encourage);
+  if(/稱讚|你很棒|好厲害|praise|compliment|you're great|amazing/.test(t)) return g(DB.praise);
+  if(/難過|傷心|委屈|心疼|sad|hurt|upset|comfort|devastated/.test(t)) return g(DB.comfort);
+  if(/睡|失眠|睡不著|睡不好|sleep|insomnia|can't sleep/.test(t)) return g(DB.sleep);
+  if(/天氣|下雨|颱風|晴天|weather|rain|sunny|storm|cold|hot/.test(t)) return g(DB.weather);
+  if(/吃|食物|餓|美食|餐廳|food|eat|hungry|meal|restaurant|cook/.test(t)) return g(DB.food);
+  if(/人生|生命|意義|存在|哲學|life|meaning|purpose|existence|philosophy/.test(t)) return g(DB.life);
+  if(/生氣|憤怒|火大|煩死|angry|mad|furious|pissed|annoyed/.test(t)) return g(DB.angry);
+  if(/luna|你是誰|你叫|介紹|about you|yourself|who are you/.test(t)) return g(DB.luna);
+  if(/無聊|沒事|bored|boring|nothing to do/.test(t)) return g(DB.bored);
+  if(/開心|快樂|高興|happy|excited|great|wonderful|joy/.test(t)) return g(DB.happy);
+  if(/聊天|隨便聊|說說話|chat|talk|hi|hello|hey|你好|哈囉/.test(t)) return g(DB.chat);
   return pick(zh?DB.def_zh:DB.def_en);
 }
 
