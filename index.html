@@ -177,13 +177,14 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
   </div>
 
   <div id="chips">
-    <div class="chip" onclick="tapChip(this)">我今天好累</div>
-    <div class="chip" onclick="tapChip(this)">I'm feeling anxious</div>
-    <div class="chip" onclick="tapChip(this)">說個笑話！</div>
-    <div class="chip" onclick="tapChip(this)">我失戀了</div>
-    <div class="chip" onclick="tapChip(this)">What's life about?</div>
-    <div class="chip" onclick="tapChip(this)">聊聊你自己</div>
-    <div class="chip" onclick="tapChip(this)">無聊死了</div>
+    <div class="chip" onclick="tapChip(this)">我現在很恐慌</div>
+    <div class="chip" onclick="tapChip(this)">幫我做呼吸練習</div>
+    <div class="chip" onclick="tapChip(this)">5-4-3-2-1 接地練習</div>
+    <div class="chip" onclick="tapChip(this)">I'm having a panic attack</div>
+    <div class="chip" onclick="tapChip(this)">我心跳很快好怕</div>
+    <div class="chip" onclick="tapChip(this)">焦慮讓我很累</div>
+    <div class="chip" onclick="tapChip(this)">我睡不著很焦慮</div>
+    <div class="chip" onclick="tapChip(this)">Tell me I'm okay</div>
   </div>
 
   <div id="ibar">
@@ -227,17 +228,15 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 
     <div class="field">
       <div class="trow">
-        <span class="tlabel">✨ 接 Gemini AI（真正 AI）</span>
+        <span class="tlabel">✨ 接 Claude AI（真正 AI）</span>
         <label class="twrap">
           <input type="checkbox" id="apitog" onchange="toggleApiField()">
           <span class="tslider"></span>
         </label>
       </div>
       <div id="apifield">
-        <div class="flabel" style="margin-top:8px">Gemini API Key</div>
-        <input id="sapikey" type="password" placeholder="AIza…">
-        <span class="hint">免費申請：aistudio.google.com → Get API Key</span>
-        <span class="hint">Key 只存在你的裝置，不會上傳 🔒</span>
+        <span class="hint" style="margin-top:6px">已連接專屬 Claude proxy 🔒</span>
+        <span class="hint">開啟後即可使用 Claude AI 對話</span>
       </div>
     </div>
 
@@ -251,6 +250,43 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 
     <button class="mbtn pri" onclick="saveSettings()">儲存 Save</button>
     <button class="mbtn sec" onclick="closeModal()">取消 Cancel</button>
+
+    <div style="border-top:0.5px solid var(--border);padding-top:14px;display:flex;flex-direction:column;gap:8px">
+      <div class="flabel">📊 Token 用量 Usage</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+        <div style="background:var(--surface2);border-radius:var(--border-radius-md);padding:10px;text-align:center">
+          <div style="font-size:11px;color:var(--text2);margin-bottom:4px">輸入 Input</div>
+          <div style="font-size:16px;font-weight:500;color:var(--text)" id="t-input">0</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:var(--border-radius-md);padding:10px;text-align:center">
+          <div style="font-size:11px;color:var(--text2);margin-bottom:4px">輸出 Output</div>
+          <div style="font-size:16px;font-weight:500;color:var(--text)" id="t-output">0</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:var(--border-radius-md);padding:10px;text-align:center">
+          <div style="font-size:11px;color:var(--text2);margin-bottom:4px">對話次數</div>
+          <div style="font-size:16px;font-weight:500;color:var(--text)" id="t-calls">0</div>
+        </div>
+      </div>
+      <div style="background:var(--surface2);border-radius:var(--border-radius-md);padding:12px;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:13px;color:var(--text2)">此 app 累計費用</span>
+          <span style="font-size:17px;font-weight:500;color:var(--text)" id="t-usd">$0.0000</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:12px;color:var(--text2);white-space:nowrap">我的餘額</span>
+          <input id="t-budget" type="number" step="0.01" min="0" placeholder="5.00" style="flex:1;border:0.5px solid var(--border);border-radius:8px;padding:6px 10px;font-size:13px;background:var(--input-bg);color:var(--text);outline:none">
+          <span style="font-size:12px;color:var(--text2)">USD</span>
+        </div>
+        <div id="t-bar-wrap" style="height:6px;background:var(--border);border-radius:3px;overflow:hidden">
+          <div id="t-bar" style="height:100%;background:#34c759;border-radius:3px;width:0%;transition:width .3s"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between">
+          <span style="font-size:11px;color:var(--text3)">Haiku: $0.80 input · $4.00 output / 1M tokens</span>
+          <span style="font-size:11px;color:var(--text2)" id="t-pct">—</span>
+        </div>
+      </div>
+      <button class="mbtn sec" style="font-size:13px;padding:8px" onclick="resetTokens()">重置此 app 用量 Reset</button>
+    </div>
   </div>
 </div>
 
@@ -259,6 +295,9 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 <script>
 // ── State ──
 let S = { name:'Luna', avatar:'🌙', dark:false, useApi:false, apiKey:'', history:[] };
+let T = { input:0, output:0, calls:0 };
+function loadT(){ try{ const d=JSON.parse(localStorage.getItem('luna_t')||'{}'); if(d.input) T.input=d.input; if(d.output) T.output=d.output; if(d.calls) T.calls=d.calls; }catch(e){} }
+function saveT(){ try{ localStorage.setItem('luna_t', JSON.stringify(T)); }catch(e){} }
 
 function saveLS() {
   try { localStorage.setItem('luna2', JSON.stringify({name:S.name,avatar:S.avatar,dark:S.dark,useApi:S.useApi,apiKey:S.apiKey})); } catch(e){}
@@ -290,9 +329,8 @@ function applyProfile() {
   document.getElementById('hav').textContent = S.avatar;
   document.getElementById('hname').textContent = S.name;
   document.title = S.name + ' Chat';
-  const on = S.useApi && S.apiKey;
-  document.getElementById('mbadge').className = on ? 'on' : '';
-  document.getElementById('mlabel').textContent = on ? 'Gemini AI' : '離線';
+  document.getElementById('mbadge').className = S.useApi ? 'on' : '';
+  document.getElementById('mlabel').textContent = S.useApi ? 'Claude AI' : '離線';
 }
 
 // ── Helpers ──
@@ -423,24 +461,40 @@ function offlineReply(txt) {
   return pick(zh?DB.def_zh:DB.def_en);
 }
 
-// ── Gemini API ──
-async function geminiReply(txt) {
-  S.history.push({role:'user',parts:[{text:txt}]});
-  const systemPrompt = `你是一個叫「${S.name}」的友善 AI 聊天夥伴，擅長情緒支持和有趣對話。請根據用戶語言自動用繁體中文（香港風格）或英文回覆。語氣溫暖自然有個性，像朋友聊天。回覆簡短（1-3句），不要過於正式。`;
-  const payload = {
-    system_instruction: { parts:[{text:systemPrompt}] },
-    contents: S.history.slice(-20),
-    generationConfig: { maxOutputTokens:200, temperature:0.9 }
-  };
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${S.apiKey}`,
-    { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) }
-  );
+// ── Claude Proxy API ──
+const PROXY = 'https://dj-ai-proxy.murmurdyj.workers.dev';
+
+async function claudeReply(txt) {
+  S.history.push({role:'user', content:txt});
+  const systemPrompt = `你是一個叫「${S.name}」的 AI 聊天夥伴。你了解恐慌症和焦慮症，但你不是治療師，你就是一個朋友。
+
+你的風格：
+- 正常聊天為主，什麼都可以聊——日常、心情、煩惱、廢話都行
+- 當對方提到恐慌或焦慮，你會自然地陪伴，不會突然變成「教學模式」
+- 不主動推呼吸技巧或醫療建議，除非對方明確要求
+- 語氣溫暖隨性，像真正的朋友，不像客服或諮商師
+- 先聽，再說。不急著給解決方案
+- 回覆簡短自然（1-4句），不寫長篇大論
+- 根據對方語言自動切換繁體中文（香港/台灣風格）或英文
+- 絕對不說「不用擔心」「沒什麼大不了」這種話`;
+
+
+  const res = await fetch(PROXY, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      model:'claude-haiku-4-5-20251001',
+      max_tokens:300,
+      system: systemPrompt,
+      messages: S.history.slice(-16)
+    })
+  });
   const data = await res.json();
-  if(data.error) throw new Error(data.error.message);
-  const reply = data.candidates[0].content.parts[0].text.trim();
-  S.history.push({role:'model',parts:[{text:reply}]});
-  if(S.history.length>30) S.history=S.history.slice(-30);
+  if(data.error) throw new Error(data.error.message||data.error);
+  const reply = data.content[0].text.trim();
+  if(data.usage){ T.input+=data.usage.input_tokens||0; T.output+=data.usage.output_tokens||0; T.calls+=1; saveT(); }
+  S.history.push({role:'assistant', content:reply});
+  if(S.history.length>32) S.history=S.history.slice(-32);
   return reply;
 }
 
@@ -454,8 +508,8 @@ async function doSend() {
   addMsg('me',txt); busy=true; showTyping();
   try {
     let reply;
-    if(S.useApi && S.apiKey) {
-      reply = await geminiReply(txt);
+    if(S.useApi) {
+      reply = await claudeReply(txt);
     } else {
       await new Promise(r=>setTimeout(r,700+Math.random()*800));
       reply = offlineReply(txt);
@@ -464,7 +518,7 @@ async function doSend() {
   } catch(e) {
     removeTyping();
     addMsg('ai', isZh(txt)?'抱歉，連線有點問題，請稍後再試 😅':'Oops, something went wrong. Try again? 😅');
-    snack('❌ '+( e.message||'API error'));
+    snack('❌ '+(e.message||'API error'));
   }
   busy=false;
 }
@@ -474,12 +528,35 @@ function tapChip(el){ document.getElementById('tinput').value=el.textContent; do
 // ── Settings ──
 function openSettings() {
   document.getElementById('sname').value=S.name;
-  document.getElementById('sapikey').value=S.apiKey;
   document.getElementById('apitog').checked=S.useApi;
   document.getElementById('darktog').checked=S.dark;
   document.getElementById('apifield').className=S.useApi?'show':'';
   document.querySelectorAll('.eopt').forEach(el=>el.className='eopt'+(el.dataset.e===S.avatar?' sel':''));
+  const saved=localStorage.getItem('luna_budget');
+  if(saved) document.getElementById('t-budget').value=saved;
+  updateTokenDisplay();
+  document.getElementById('t-budget').oninput=function(){
+    localStorage.setItem('luna_budget',this.value);
+    updateTokenDisplay();
+  };
   document.getElementById('overlay').className='show';
+}
+function updateTokenDisplay(){
+  const usd=(T.input/1000000)*0.8+(T.output/1000000)*4;
+  document.getElementById('t-input').textContent=T.input.toLocaleString();
+  document.getElementById('t-output').textContent=T.output.toLocaleString();
+  document.getElementById('t-calls').textContent=T.calls.toLocaleString();
+  document.getElementById('t-usd').textContent='$'+usd.toFixed(4);
+  const budget=parseFloat(document.getElementById('t-budget')?.value)||0;
+  if(budget>0){
+    const pct=Math.min((usd/budget)*100,100);
+    document.getElementById('t-bar').style.width=pct+'%';
+    document.getElementById('t-bar').style.background=pct>80?'#ff3b30':pct>50?'#ff9500':'#34c759';
+    document.getElementById('t-pct').textContent=pct.toFixed(1)+'% 已用';
+  }
+}
+function resetTokens(){
+  T={input:0,output:0,calls:0}; saveT(); updateTokenDisplay(); snack('🔄 用量已重置');
 }
 function closeModal(){ document.getElementById('overlay').className=''; }
 function maybeClose(e){ if(e.target===document.getElementById('overlay')) closeModal(); }
@@ -493,7 +570,6 @@ function saveSettings(){
   S.name=document.getElementById('sname').value.trim()||'Luna';
   S.avatar=document.querySelector('.eopt.sel')?.dataset.e||'🌙';
   S.useApi=document.getElementById('apitog').checked;
-  S.apiKey=document.getElementById('sapikey').value.trim();
   applyProfile(); saveLS(); closeModal(); snack('✅ 已儲存 Saved!');
 }
 
@@ -520,9 +596,9 @@ if('serviceWorker' in navigator){
 }
 
 // ── Init ──
-loadLS(); applyDark(); applyProfile(); setDayLabel();
+loadLS(); loadT(); applyDark(); applyProfile(); setDayLabel();
 setTimeout(()=>{
-  addMsg('ai','嗨！我是 '+S.name+' 🌙 有什麼想聊的嗎？\nHi! Feel free to chat in 繁中 or English!');
+  addMsg('ai','嗨，我是 '+S.name+' 🌙 我在這裡陪你。\n不管是恐慌、焦慮、還是只是需要有人說說話，都可以跟我說 💛\n\nHi, I\'m '+S.name+' — I\'m here with you. Whether you\'re panicking, anxious, or just need someone to talk to, I\'m listening 💙');
 },400);
 </script>
 </body>
