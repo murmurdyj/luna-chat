@@ -252,6 +252,18 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
     <button class="mbtn sec" onclick="closeModal()">取消 Cancel</button>
 
     <div style="border-top:0.5px solid var(--border);padding-top:14px;display:flex;flex-direction:column;gap:8px">
+      <div class="flabel">🗑️ 清空對話 Clear Chat</div>
+      <button class="mbtn sec" style="font-size:13px;padding:10px;text-align:left;display:flex;flex-direction:column;gap:2px" onclick="clearChat(false)">
+        <span style="font-weight:500;color:var(--text)">清空畫面</span>
+        <span style="font-size:11px;color:var(--text2)">只清掉訊息，AI 還記得你說過的話</span>
+      </button>
+      <button class="mbtn sec" style="font-size:13px;padding:10px;text-align:left;display:flex;flex-direction:column;gap:2px;border-color:var(--color-border-danger)" onclick="clearChat(true)">
+        <span style="font-weight:500;color:var(--color-text-danger)">清空畫面 + 重置 AI 記憶</span>
+        <span style="font-size:11px;color:var(--text2)">全新開始，AI 不記得之前的對話</span>
+      </button>
+    </div>
+
+    <div style="border-top:0.5px solid var(--border);padding-top:14px;display:flex;flex-direction:column;gap:8px">
       <div class="flabel">📊 Token 用量 Usage</div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
         <div style="background:var(--surface2);border-radius:var(--border-radius-md);padding:10px;text-align:center">
@@ -557,6 +569,22 @@ function updateTokenDisplay(){
 }
 function resetTokens(){
   T={input:0,output:0,calls:0}; saveT(); updateTokenDisplay(); snack('🔄 用量已重置');
+}
+function clearChat(resetMemory){
+  const msg = resetMemory ? '確定要清空畫面並重置 AI 記憶嗎？' : '確定要清空畫面嗎？';
+  if(!confirm(msg)) return;
+  const msgs=document.getElementById('msgs');
+  msgs.innerHTML='<div class="day-lbl" id="daylbl"></div>';
+  setDayLabel();
+  if(resetMemory){
+    S.history=[];
+    setTimeout(()=>{ addMsg('ai','對話已重置 🌙 我們重新開始吧！\nChat cleared — fresh start! 🌙'); },200);
+    snack('✅ 畫面和記憶都清空了');
+  } else {
+    setTimeout(()=>{ addMsg('ai','畫面清空了，但我還記得你之前說的 😊'); },200);
+    snack('✅ 畫面已清空');
+  }
+  closeModal();
 }
 function closeModal(){ document.getElementById('overlay').className=''; }
 function maybeClose(e){ if(e.target===document.getElementById('overlay')) closeModal(); }
